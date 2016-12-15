@@ -1,0 +1,24 @@
+version: '2'
+services:
+  metadata-hunter:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: keboola/metadata-hunter
+    tty: true
+    stdin_open: true
+    network_mode: bridge
+    volumes:
+      - ./data:/data
+      - .:/code
+
+  tests:
+    image: keboola/metadata-hunter
+    tty: true
+    stdin_open: true
+    command: /code/tests.sh
+    volumes:
+      - ./tests/data:/data
+      - .:/code
+    environment:
+      - KBC_TOKEN=$KBC_TOKEN

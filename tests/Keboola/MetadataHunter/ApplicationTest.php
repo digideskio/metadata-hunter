@@ -4,14 +4,12 @@ namespace Keboola\MetadataHunter\Test;
 
 use Keboola\Csv\CsvFile;
 use Keboola\MetadataHunter\Application;
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\Finder\SplFileInfo;
-use Symfony\Component\Process\Process;
 use Symfony\Component\Yaml\Yaml;
 
 class ApplicationTest extends \PHPUnit_Framework_TestCase
 {
+    private $token;
+
     /** @var Application */
     private $application;
 
@@ -19,8 +17,9 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
+        $this->token = getenv("KBC_TOKEN");
         $this->config = $this->getConfig();
-        $this->application = new Application($this->config);
+        $this->application = new Application($this->config, $this->token);
     }
 
     private function getConfig($suffix = '')
@@ -33,6 +32,7 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
 
     public function testAppRun()
     {
+        echo "Running the test";
         $this->application->run();
     }
 }

@@ -6,6 +6,7 @@ use Keboola\MetadataHunter\Configuration\ConfigDefinition;
 use Keboola\MetadataHunter\Exception\ApplicationException;
 use Keboola\MetadataHunter\Exception\UserException;
 use Keboola\StorageApi\Client;
+use Keboola\StorageApi\Components;
 use Keboola\StorageApi\ClientException;
 use Monolog\Handler\NullHandler;
 use Pimple\Container;
@@ -14,9 +15,10 @@ use Symfony\Component\Config\Definition\Processor;
 
 class Application
 {
+
     private $container;
 
-    public function __construct($config)
+    public function __construct($config, $token)
     {
         $container = new Container();
         $container['action'] = isset($config['action'])?$config['action']:'run';
@@ -28,7 +30,14 @@ class Application
             }
             return $logger;
         };
-
+        
+        $container['sapiClient'] = function () use ($token) {
+            try {
+                return new Client(['token' => $token]);
+            } catch (ClientException $e) {
+                throw new UserException("Sapi Client init fail: " . $e->getMessage(), $e->getCode(), $e);
+            }
+        };
         $this->container = $container;
     }
 
@@ -44,13 +53,13 @@ class Application
             return $this->$actionMethod();
         } catch (ClientException $e) {
             if ($e->getCode() == 401) {
-                throw new UserException("Invalid storage token, please reauthorize.", 401, $e);
+                throw new UserException("Invalid storage token.", 401, $e);
             }
             if ($e->getCode() == 403) {
                 throw new UserException("Forbidden: " . $e->getMessage(), 403, $e);
             }
             if ($e->getCode() == 404) {
-                throw new UserException("That wasn't the droid I was looking for: " . $e->getMessage(), 404, $e);
+                throw new UserException("Not found: " . $e->getMessage(), 404, $e);
             }
             if ($e->getCode() == 400) {
                 throw new UserException($e->getMessage());
@@ -61,8 +70,37 @@ class Application
 
     private function runAction()
     {
+        // Go get some metadata
+        /** @var Client $client */
+        $client = $this->container['sapiClient'];
+        $componentsApi = new Components($client);
+        /** @var Logger $logger */
+        $logger = $this->container['logger'];
+        $configs = $componentsApi->getComponentConfigurations("transformation");
+
+        $logger->info("Found " . count($configs) . " transformation configs");
+
+        foreach ($configs as $i => $config) {
+
+            foreach ($config['rows'] as $j => $configRow) {
+
+                if (!empty($configRow['configuration']['input'])) {
+                    foreach ($configRow['configuration']['input'] as $input) {
+                        if (!empty($input['datatypes'])) {
+                            var_dump($input['datatypes']);
+                        }
+                    }
+                }
+
+            }
+
+        }
+        // Write it to sapi
+
+        // Return a log of what just happened
         return [
             'status' => 'ok',
+            'updates' => []  // list of metadata keys and compositeId/URI that were updated.
         ];
     }
 
