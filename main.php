@@ -46,5 +46,3 @@ try {
 $logger->log('info', "Metadata Writer finished successfully.");
 
 exit(0);
-
-
