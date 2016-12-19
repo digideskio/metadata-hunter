@@ -93,7 +93,7 @@ class Application
             foreach ($configs as $i => $config) {
                 foreach ($config['rows'] as $j => $configRow) {
                     if (!empty($configRow['configuration']['input'])) {
-                        $backend = (isset($configRow['configuration']['backend'])) ? $configRow['configuration']['backend'] : "null";
+                        $backend = (isset($configRow['configuration']['backend'])) ? $configRow['configuration']['backend'] : "";
                         foreach ($configRow['configuration']['input'] as $input) {
                             if (!empty($input['datatypes'])) {
                                 foreach ($input['datatypes'] as $column => $type) {
@@ -103,7 +103,7 @@ class Application
                                             $input['source'] . "." . $column,
                                             self::APP_NAME,
                                             [[
-                                                "key" => $component . "." . $backend . ".datatype",
+                                                "key" => "datatype." . $backend . "." . $component,
                                                 "value" => $type
                                             ]]
                                         );
