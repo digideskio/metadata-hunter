@@ -14,8 +14,8 @@
         <const name="ROOT_PATH" value="./"/>
     </php>
 
-    <testsuite name="Metadata Hunter Test Suite">
-        <directory>tests/Keboola</directory>
+    <testsuite name="tests">
+        <directory>tests/Keboola/MetadataHunter</directory>
     </testsuite>
 
     <filter>

@@ -16,7 +16,7 @@ services:
     image: keboola/metadata-hunter
     tty: true
     stdin_open: true
-    command: /code/tests.sh
+    command: code/tests.sh
     volumes:
       - ./tests/data:/data
       - .:/code

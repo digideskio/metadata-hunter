@@ -8,7 +8,6 @@ use Symfony\Component\Yaml;
 
 require_once(dirname(__FILE__) . "/bootstrap.php");
 
-echo "FUCK YOU: " . getenv("KBC_TOKEN");
 defined('KBC_URL') || define('KBC_URL', getenv('KBC_URL')? getenv('KBC_URL') : 'https://connection.keboola.com');
 defined('KBC_TOKEN') || define('KBC_TOKEN', getenv('KBC_TOKEN')? getenv('KBC_TOKEN') : 'token');
 
@@ -22,12 +21,10 @@ try {
 
     $config = Yaml\Yaml::parse(file_get_contents($arguments["data"] . "/config.yml"));
 
-    var_dump($config);
-
     $config['parameters']['data_dir'] = $arguments['data'];
     $app = new Application($config, getenv("KBC_TOKEN"));
     $result = $app->run();
-    echo "RAN APP!";
+
     if (isset($config['action'])) {
         echo json_encode($result);
         exit(0);
