@@ -2,6 +2,8 @@
 
 namespace Keboola\MetadataHunter;
 
+use Keboola\MetadataHunter\ConfigParsers\DbWriterConfigParser;
+use Keboola\MetadataHunter\ConfigParsers\TransformationConfigParser;
 use Keboola\MetadataHunter\Configuration\ConfigDefinition;
 use Keboola\MetadataHunter\Exception\ApplicationException;
 use Keboola\MetadataHunter\Exception\UserException;
@@ -18,7 +20,7 @@ class Application
 {
 
     const APP_NAME = "keboola.metadata-hunter";
-
+    
     private $container;
 
     public function __construct($config, $token)
@@ -91,31 +93,20 @@ class Application
             $logger->info("Found " . count($configs) . " {$component} configs");
 
             foreach ($configs as $i => $config) {
-                foreach ($config['rows'] as $j => $configRow) {
-                    if (!empty($configRow['configuration']['input'])) {
-                        $backend = (isset($configRow['configuration']['backend'])) ? $configRow['configuration']['backend'] : "";
-                        foreach ($configRow['configuration']['input'] as $input) {
-                            if (!empty($input['datatypes'])) {
-                                foreach ($input['datatypes'] as $column => $type) {
-                                    try {
-                                        $logger->debug("Writing metadata for " . $input['source'] . "." . $column);
-                                        $output = $metadataApi->postColumnMetadata(
-                                            $input['source'] . "." . $column,
-                                            self::APP_NAME,
-                                            [[
-                                                "key" => "datatype." . $backend . "." . $component,
-                                                "value" => $type
-                                            ]]
-                                        );
-                                    } catch (ClientException $e) {
-                                        if ($e->getCode() === 404) {
-                                            $logger->error("Could not find the object, must be an old config " . $e->getMessage());
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                switch ($component) {
+                    case "transformation":
+                        $parser = new TransformationConfigParser($config, $logger);
+                        break;
+                    case (preg_match('/wr\-db.*/', $component) ? true : false):
+                        $parser = new DbWriterConfigParser($component, $config, $logger);
+                        break;
+                    default:
+                        throw new UserException("I do not know how to parse configs for {$component} component.");
+                        break;
+                }
+                $meta = $parser->getDatatypes();
+                foreach ($meta as $column => $metaArray) {
+                    $metadataApi->postColumnMetadata($column, self::APP_NAME, $metaArray);
                 }
             }
         }

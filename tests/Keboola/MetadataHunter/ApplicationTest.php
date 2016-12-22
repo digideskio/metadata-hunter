@@ -72,6 +72,10 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
         return $config;
     }
 
+    public function testWrDbDatatypesAppRun() {
+        
+    }
+    
     public function testTransformationDatatypesAppRun()
     {
 
@@ -103,15 +107,15 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
 
             $this->assertEquals(count($idMeta), 1);
             $this->assertEquals($idMeta[0]['provider'], "keboola.metadata-hunter");
-            $this->assertEquals($idMeta[0]['key'], "transformation.snowflake.datatype");
+            $this->assertEquals($idMeta[0]['key'], "datatype.snowflake.transformation");
             $this->assertEquals($idMeta[0]['value'], "VARCHAR(30)");
 
             $this->assertEquals($nameMeta[0]['provider'], "keboola.metadata-hunter");
-            $this->assertEquals($nameMeta[0]['key'], "transformation.snowflake.datatype");
+            $this->assertEquals($nameMeta[0]['key'], "datatype.snowflake.transformation");
             $this->assertEquals($nameMeta[0]['value'], "VARCHAR (255)");
 
             $this->assertEquals($countMeta[0]['provider'], "keboola.metadata-hunter");
-            $this->assertEquals($countMeta[0]['key'], "transformation.snowflake.datatype");
+            $this->assertEquals($countMeta[0]['key'], "datatype.snowflake.transformation");
             $this->assertEquals($countMeta[0]['value'], "INT(10)");
         }
     }
